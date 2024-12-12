@@ -1,11 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
+import { lawyersList } from './Team'
+import DateTimePicker from '../components/DateTimePicker'
 
 export default function Appointment() {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const selectedLawyerId = searchParams.get('lawyer')
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     specialty: '',
+    lawyer: selectedLawyerId || '',
     date: '',
     time: '',
     message: '',
@@ -19,11 +27,60 @@ export default function Appointment() {
     'Droit pénal',
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (selectedLawyerId) {
+      const lawyer = lawyersList.find(l => l.id.toString() === selectedLawyerId)
+      if (lawyer && lawyer.specialties.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          specialty: lawyer.specialties[0]
+        }))
+      }
+    }
+  }, [selectedLawyerId])
+
+  const sendConfirmationEmail = async (appointmentData: typeof formData) => {
+    // Ici, vous pouvez implémenter l'envoi réel d'email
+    // Par exemple, en utilisant un service comme SendGrid, Mailjet, etc.
+    console.log('Email de confirmation envoyé à:', appointmentData.email)
+    
+    // Simulation d'envoi d'email
+    const emailContent = `
+      Cher/Chère ${appointmentData.name},
+
+      Nous vous confirmons votre demande de rendez-vous :
+      
+      Date : ${appointmentData.date}
+      Heure : ${appointmentData.time}
+      Avocat : ${lawyersList.find(l => l.id.toString() === appointmentData.lawyer)?.name}
+      Spécialité : ${appointmentData.specialty}
+
+      Nous vous contacterons rapidement pour confirmer votre rendez-vous.
+      
+      Cordialement,
+      L'équipe du Cabinet Juridique
+    `
+    
+    console.log('Contenu de l\'email :', emailContent)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Ici, vous pouvez ajouter la logique pour traiter le formulaire
-    console.log(formData)
-    alert('Demande de rendez-vous envoyée avec succès !')
+    
+    try {
+      // Envoi de l'email de confirmation
+      await sendConfirmationEmail(formData)
+
+      // Redirection vers la page de remerciement avec les détails du rendez-vous
+      navigate('/thank-you', { 
+        state: { 
+          appointment: formData
+        }
+      })
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi de l\'email:', error)
+      alert('Une erreur est survenue. Veuillez réessayer.')
+    }
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -32,6 +89,12 @@ export default function Appointment() {
       ...prev,
       [name]: value
     }))
+  }
+
+  const getAvailableDays = () => {
+    if (!formData.lawyer) return []
+    const lawyer = lawyersList.find(l => l.id.toString() === formData.lawyer)
+    return lawyer ? lawyer.disponibility.split(', ') : []
   }
 
   return (
@@ -45,58 +108,30 @@ export default function Appointment() {
         </p>
       </div>
       <form onSubmit={handleSubmit} className="mx-auto mt-16 max-w-xl sm:mt-20">
-        <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label htmlFor="name" className="block text-sm font-semibold leading-6 text-gray-900">
-              Nom complet
-            </label>
-            <div className="mt-2.5">
-              <input
-                type="text"
-                name="name"
-                id="name"
-                autoComplete="name"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
+        <div className="grid grid-cols-1 gap-x-8 gap-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold leading-6 text-gray-900">
-              Email
+            <label htmlFor="lawyer" className="block text-sm font-semibold leading-6 text-gray-900">
+              Avocat
             </label>
             <div className="mt-2.5">
-              <input
-                type="email"
-                name="email"
-                id="email"
-                autoComplete="email"
+              <select
+                name="lawyer"
+                id="lawyer"
                 required
-                value={formData.email}
+                value={formData.lawyer}
                 onChange={handleChange}
-                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
-              />
+                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
+              >
+                <option value="">Sélectionnez un avocat</option>
+                {lawyersList.map((lawyer) => (
+                  <option key={lawyer.id} value={lawyer.id}>
+                    {lawyer.name} - {lawyer.specialties.join(', ')}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-          <div>
-            <label htmlFor="phone" className="block text-sm font-semibold leading-6 text-gray-900">
-              Téléphone
-            </label>
-            <div className="mt-2.5">
-              <input
-                type="tel"
-                name="phone"
-                id="phone"
-                autoComplete="tel"
-                required
-                value={formData.phone}
-                onChange={handleChange}
-                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
-              />
-            </div>
-          </div>
+
           <div className="sm:col-span-2">
             <label htmlFor="specialty" className="block text-sm font-semibold leading-6 text-gray-900">
               Spécialité
@@ -119,40 +154,71 @@ export default function Appointment() {
               </select>
             </div>
           </div>
-          <div>
-            <label htmlFor="date" className="block text-sm font-semibold leading-6 text-gray-900">
-              Date
+
+          <div className="sm:col-span-2">
+            <DateTimePicker
+              selectedDate={formData.date}
+              selectedTime={formData.time}
+              onDateChange={(date) => handleChange({ target: { name: 'date', value: date } } as any)}
+              onTimeChange={(time) => handleChange({ target: { name: 'time', value: time } } as any)}
+              availableDays={getAvailableDays()}
+            />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label htmlFor="name" className="block text-sm font-semibold leading-6 text-gray-900">
+              Nom complet
             </label>
             <div className="mt-2.5">
               <input
-                type="date"
-                name="date"
-                id="date"
+                type="text"
+                name="name"
+                id="name"
+                autoComplete="name"
                 required
-                value={formData.date}
+                value={formData.name}
                 onChange={handleChange}
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
               />
             </div>
           </div>
+
           <div>
-            <label htmlFor="time" className="block text-sm font-semibold leading-6 text-gray-900">
-              Heure
+            <label htmlFor="email" className="block text-sm font-semibold leading-6 text-gray-900">
+              Email
             </label>
             <div className="mt-2.5">
               <input
-                type="time"
-                name="time"
-                id="time"
+                type="email"
+                name="email"
+                id="email"
+                autoComplete="email"
                 required
-                min="09:00"
-                max="20:00"
-                value={formData.time}
+                value={formData.email}
                 onChange={handleChange}
                 className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
               />
             </div>
           </div>
+
+          <div>
+            <label htmlFor="phone" className="block text-sm font-semibold leading-6 text-gray-900">
+              Téléphone
+            </label>
+            <div className="mt-2.5">
+              <input
+                type="tel"
+                name="phone"
+                id="phone"
+                autoComplete="tel"
+                required
+                value={formData.phone}
+                onChange={handleChange}
+                className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+
           <div className="sm:col-span-2">
             <label htmlFor="message" className="block text-sm font-semibold leading-6 text-gray-900">
               Message
@@ -169,6 +235,7 @@ export default function Appointment() {
             </div>
           </div>
         </div>
+
         <div className="mt-10">
           <button
             type="submit"
