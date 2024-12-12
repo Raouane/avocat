@@ -1,11 +1,47 @@
-# React + TypeScript + Vite
+# Cabinet d'Avocat - Système de Rendez-vous en Ligne
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![Netlify Status](https://api.netlify.com/api/v1/badges/c6e87c6d-1802-4ee1-87dd-9128ad492670/deploy-status)](https://app.netlify.com/sites/avocatv1/deploys)
 
-Currently, two official plugins are available:
+## À propos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Une application web moderne pour la gestion de rendez-vous d'un cabinet d'avocats. Développée avec React, TypeScript et Tailwind CSS.
+
+## Fonctionnalités
+
+- 👨‍⚖️ Présentation de l'équipe d'avocats et leurs spécialités
+- 📅 Système de prise de rendez-vous en ligne
+- 🕒 Sélection de créneaux horaires selon les disponibilités
+- 📧 Confirmation par email des rendez-vous
+- 📱 Interface responsive et moderne
+
+## Technologies Utilisées
+
+- React + TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- HeadlessUI
+
+## Développement Local
+
+1. Cloner le repository
+```bash
+git clone https://github.com/Raouane/avocat.git
+```
+
+2. Installer les dépendances
+```bash
+npm install
+```
+
+3. Lancer le serveur de développement
+```bash
+npm run dev
+```
+
+## Déploiement
+
+L'application est déployée automatiquement sur Netlify à chaque push sur la branche main.
 
 ## Expanding the ESLint configuration
 

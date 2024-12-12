@@ -90,6 +90,7 @@ export default function Team() {
                 <div className="mt-8">
                   <Link
                     to={`/appointment?lawyer=${lawyer.id}`}
+                    onClick={() => window.scrollTo(0, 0)}
                     className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-accent"
                   >
                     Prendre rendez-vous

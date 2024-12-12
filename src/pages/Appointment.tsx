@@ -28,6 +28,7 @@ export default function Appointment() {
   ]
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (selectedLawyerId) {
       const lawyer = lawyersList.find(l => l.id.toString() === selectedLawyerId)
       if (lawyer && lawyer.specialties.length > 0) {
